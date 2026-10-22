@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JAY ALPHA SYSTEM — Quantitative 2.00+ Odds Engine (SportyBet Calibrated)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #070b12;
+      --bg-surface: #0f1623;
+      --bg-card: #131c2e;
+      --bg-card-hover: #18243a;
+      --bg-elevated: #1c2a42;
+      --border-subtle: rgba(148, 163, 184, 0.14);
+      --border-highlight: rgba(16, 185, 129, 0.45);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --sporty-red: #e11d48;
+      --sporty-red-soft: rgba(225, 29, 72, 0.15);
+      --alpha-green: #10b981;
+      --alpha-green-soft: rgba(16, 185, 129, 0.15);
+      --amber-gold: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.15);
+      --cyan-accent: #06b6d4;
+      --cyan-soft: rgba(6, 182, 212, 0.14);
+      --purple-wta: #a855f7;
+      --purple-soft: rgba(168, 85, 247, 0.15);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      background-image:
+        radial-gradient(circle at 12% 0%, rgba(16, 185, 129, 0.08), transparent 35%),
+        radial-gradient(circle at 88% 5%, rgba(225, 29, 72, 0.07), transparent 35%);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* TOP COMMAND HEADER */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 11, 18, 0.90);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 55%, #e11d48 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 18px;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--sporty-red-soft);
+      color: #fb7185;
+      border: 1px solid rgba(225, 29, 72, 0.35);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .status-pills {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .pill.live {
+      background: var(--alpha-green-soft);
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .pill.no-bball {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.25); opacity: 0.65; }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      border: 1px solid transparent;
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    .btn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #04130d;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-sporty {
+      background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(225, 29, 72, 0.28);
+    }
+
+    .btn-outline {
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    /* API KEY & CALIBRATION DRAWER */
+    .api-drawer {
+      background: linear-gradient(180deg, #111a2e 0%, #0c1322 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 18px 24px;
+      display: none;
+    }
+
+    .api-drawer.open {
+      display: block;
+    }
+
+    .api-grid {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-input, .field-select {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      width: 100%;
+    }
+
+    .field-input:focus, .field-select:focus {
+      outline: none;
+      border-color: var(--alpha-green);
+    }
+
+    /* MAIN LAYOUT */
+    .workspace {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 20px 24px 60px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 1120px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* CONTROL BAR */
+    .control-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-tab {
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mode-tab.active {
+      background: var(--alpha-green-soft);
+      color: #34d399;
+      border-color: var(--border-highlight);
+    }
+
+    .buffer-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* SECTION HEADERS */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 3 CURATED 2.00+ TICKETS GRID */
+    .tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .ticket-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .ticket-card:hover {
+      border-color: var(--border-highlight);
+      transform: translateY(-2px);
+    }
+
+    .ticket-card.banker {
+      border-top: 3px solid var(--alpha-green);
+    }
+
+    .ticket-card.hybrid {
+      border-top: 3px solid var(--purple-wta);
+    }
+
+    .ticket-card.shield {
+      border-top: 3px solid var(--amber-gold);
+    }
+
+    .ticket-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .ticket-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      color: var(--text-primary);
+    }
+
+    .ticket-sub {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .odds-badge-box {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .sporty-odds-big {
+      font-size: 24px;
+      font-weight: 800;
+      color: #34d399;
+      line-height: 1.1;
+    }
+
+    .global-odds-small {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .leg-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 11px 12px;
+      margin-bottom: 10px;
+    }
+
+    .leg-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+
+    .sport-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    .sport-tag.football {
+      background: var(--alpha-green-soft);
+      color: #34d399;
+    }
+
+    .sport-tag.wta {
+      background: var(--purple-soft);
+      color: #c084fc;
+    }
+
+    .sport-tag.atp {
+      background: var(--cyan-soft);
+      color: #22d3ee;
+    }
+
+    .leg-teams {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .leg-pick-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.22);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+    }
+
+    .leg-pick-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #6ee7b7;
+    }
+
+    .leg-pick-odds {
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .leg-rationale {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .ticket-footer {
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ticket-metrics {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .ticket-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    /* LIVE SCANNER TABLE */
+    .scanner-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 28px;
+    }
+
+    .scanner-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table.quant-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    table.quant-table th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    table.quant-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+      vertical-align: middle;
+    }
+
+    table.quant-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .market-pills-wrap {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .mkt-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 5px 9px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      color: var(--text-primary);
+    }
+
+    .mkt-chip:hover {
+      border-color: var(--alpha-green);
+      background: var(--alpha-green-soft);
+    }
+
+    .mkt-chip .odd-val {
+      color: #34d399;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* RIGHT SIDEBAR: INTERACTIVE SPORTYBET SLIP & VERIFIER */
+    .sidebar-sticky {
+      position: sticky;
+      top: 78px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .slip-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .slip-header {
+      background: linear-gradient(135deg, #e11d48 0%, #9f1239 100%);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .slip-header-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slip-body {
+      padding: 16px;
+    }
+
+    .slip-leg {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .slip-leg-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .remove-leg {
+      background: none;
+      border: none;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .slip-odd-edit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(148, 163, 184, 0.14);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .odd-override-input {
+      width: 74px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      color: #34d399;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 12.5px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      text-align: right;
+    }
+
+    .slip-summary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      margin-bottom: 8px;
+    }
+
+    .status-banner {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      margin: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .status-banner.pass {
+      background: var(--alpha-green-soft);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .status-banner.warn {
+      background: var(--amber-soft);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    /* BANKROLL TRACKER PANEL */
+    .bankroll-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+
+    .day-pills {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    .day-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .day-box.won {
+      background: var(--alpha-green-soft);
+      border-color: #10b981;
+      color: #34d399;
+    }
+
+    .day-box.lost {
+      background: var(--sporty-red-soft);
+      border-color: #e11d48;
+      color: #fb7185;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #04130d;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP COMMAND BAR -->
+  <header class="topbar">
+    <div class="brand-cluster">
+      <div class="brand-logo">JA</div>
+      <div>
+        <div class="brand-title">
+          JAY ALPHA SYSTEM
+          <span class="brand-badge">SportyBet 2.00+ Calibrated</span>
+        </div>
+        <div class="brand-sub">Quantitative Real-Football &amp; WTA/ATP 2-Odds Engine • Zero Virtuals • Zero Basketball</div>
+      </div>
+    </div>
+
+    <div class="status-pills">
+      <div class="pill live" id="feedStatusPill">
+        <span class="dot-pulse"></span>
+        <span id="feedStatusText">Scanning Live Fixtures...</span>
+      </div>
+      <div class="pill no-bball" title="Basketball is permanently excluded by system rule">
+        🚫 Basketball Hard-Blocked
+      </div>
+      <button class="btn btn-outline" onclick="toggleApiDrawer()">
+        🔑 API Keys &amp; SportyBet Buffer
+      </button>
+    </div>
+  </header>
+
+  <!-- PLUG-AND-PLAY API KEY & SPORTYBET CALIBRATION DRAWER -->
+  <section class="api-drawer" id="apiDrawer">
+    <div class="api-grid">
+      <div class="field-group">
+        <label class="field-label">
+          <span>The Odds API Key (api.the-odds-api.com)</span>
+          <a href="https://the-odds-api.com" target="_blank" style="color:#34d399;text-decoration:none;font-size:11px;">Get Free Key ↗</a>
+        </label>
+        <input type="text" id="oddsApiKeyInput" class="field-input" placeholder="Paste your The Odds API key (or leave blank for built-in Live Feed)..." />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <span>SportingOdds / API-Football Key (Optional)</span>
+          <span style="color:var(--text-muted);font-size:11px;">Auto-normalized</span>
+        </label>
+        <input type="text" id="sportingApiKeyInput" class="field-input" placeholder="Optional secondary key..." />
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">
+          <span>SportyBet Odds Haircut Buffer</span>
+          <span class="mono" id="haircutValLabel" style="color:#34d399;">-3.0% (Safe Floor)</span>
+        </label>
+        <select id="haircutSelect" class="field-select" onchange="saveSettingsAndRefresh()">
+          <option value="0.015">-1.5% (Light — Closer to Global Odds)</option>
+          <option value="0.025" selected>-2.5% (Standard SportyBet Nigeria Calibration)</option>
+          <option value="0.040">-4.0% (Strict — Guarantees 2.00+ even if odds drop)</option>
+          <option value="0.055">-5.5% (Ultra-Conservative Buffer)</option>
+        </select>
+      </div>
+
+      <div class="field-group" style="display:flex;flex-direction:row;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveSettingsAndRefresh()">
+          ⚡ Save Key &amp; Sync Live Data
+        </button>
+        <button class="btn btn-outline" onclick="toggleApiDrawer()">
+          Close
+        </button>
+      </div>
+    </div>
+    <div style="max-width:1440px;margin:10px auto 0;font-size:12px;color:var(--text-secondary);" id="apiStatusBanner">
+      STATUS: Built-in Real-Time ESPN + DraftKings Odds Feed is active out-of-the-box. Paste your The Odds API key above anytime to layer EU/UK multi-bookie lines.
+    </div>
+  </section>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace">
+    <!-- LEFT COLUMN: CURATED 2.00+ TICKETS + LIVE MATCH SCANNER -->
+    <div>
+      <!-- HERO FILTER & CONTROL STRIP -->
+      <div class="control-bar">
+        <div>
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:6px;font-weight:700;">
+            Select Alpha Sport Mode (Basketball Permanently Disabled)
+          </div>
+          <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="hybrid" onclick="setSportMode('hybrid', this)">
+              ⚡ Hybrid Alpha (Football + WTA/ATP Tennis)
+            </button>
+            <button class="mode-tab" data-mode="football" onclick="setSportMode('football', this)">
+              ⚽ Pure Football Only
+            </button>
+            <button class="mode-tab" data-mode="tennis" onclick="setSportMode('tennis', this)">
+              🎾 WTA &amp; ATP Tennis Only (Zero Draw Risk)
+            </button>
+          </div>
+        </div>
+
+        <div class="buffer-controls">
+          <div class="field-group" style="min-width:195px;">
+            <label class="field-label">Target SportyBet Ticket Floor</label>
+            <select id="minTargetSelect" class="field-select" onchange="saveSettingsAndRefresh()">
+              <option value="2.02">2.02x Min (Raw ~2.14x)</option>
+              <option value="2.06" selected>2.06x Min (Guaranteed 2.00+ on SportyBet)</option>
+              <option value="2.15">2.15x Min (Extra Cushion)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" style="margin-top:18px;" onclick="fetchLiveFeed()">
+            🔄 Re-Analyze Live Slate
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTION 1: 3 DAILY CURATED 2.00+ SPORTYBET TICKETS -->
+      <div class="section-head">
+        <div>
+          <div class="section-title">
+            <span>🎯 Today's Curated 2.00+ SportyBet Tickets</span>
+            <span class="pill live" style="font-size:11px;padding:3px 9px;">Max 2–3 Legs • Buffer Protected</span>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-secondary);margin-top:2px;">
+            Every ticket is calibrated with a built-in haircut so when you punch the picks into <strong>SportyBet</strong>, your slip stays strictly <strong>above 2.00 odds</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="tickets-grid" id="ticketsContainer">
+        <!-- Populated dynamically -->
+      </div>
+
+      <!-- SECTION 2: FULL QUANTITATIVE MATCH & MARKET SCANNER -->
+      <div class="scanner-card">
+        <div class="section-head">
+          <div>
+            <div class="section-title">📊 Live Quantitative Match &amp; Market Scanner</div>
+            <div style="font-size:12px;color:var(--text-secondary);">
+              Click any market chip below to add it directly to your Interactive 2.00+ SportyBet Slip on the right.
+            </div>
+          </div>
+
+          <div class="scanner-filters">
+            <select id="leagueFilter" class="field-select" style="width:auto;min-width:180px;" onchange="renderScannerTable()">
+              <option value="ALL">All Active Leagues &amp; Tours</option>
+            </select>
+            <select id="categoryFilter" class="field-select" style="width:auto;min-width:170px;" onchange="renderScannerTable()">
+              <option value="ALL">All Safe Market Types</option>
+              <option value="Goals Safe">Goals Safe (Over 1.5 / U3.5)</option>
+              <option value="Draw Protected">Draw Protected (1X / X2 / DNB)</option>
+              <option value="Team Goals">Team Goals (Home/Away O0.5)</option>
+              <option value="No-Draw Winner">WTA/ATP Match Winner</option>
+              <option value="Set Shield">WTA/ATP +1.5 Sets Shield</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="quant-table">
+            <thead>
+              <tr>
+                <th>Sport / League</th>
+                <th>Fixture &amp; Kickoff (WAT)</th>
+                <th>Model Projection</th>
+                <th>Top Alpha Safe Markets (Click to Add to Slip)</th>
+              </tr>
+            </thead>
+            <tbody id="scannerTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR: INTERACTIVE SPORTYBET SLIP + 7-DAY BANKROLL TRACKER -->
+    <aside class="sidebar-sticky">
+      <!-- SPORTYBET SLIP VERIFIER -->
+      <div class="slip-panel">
+        <div class="slip-header">
+          <div class="slip-header-title">
+            <span>🧾 SPORTYBET 2.00+ SLIP VERIFIER</span>
+          </div>
+          <span class="mono" style="font-size:12px;background:rgba(0,0,0,0.28);padding:3px 8px;border-radius:4px;" id="slipLegCount">0 Legs</span>
+        </div>
+
+        <div class="slip-body">
+          <div style="font-size:11.5px;color:var(--text-secondary);margin-bottom:10px;">
+            If SportyBet changes an odd by a few points on your phone, type the exact SportyBet odd below. If your total dips under <strong>2.00x</strong>, click <strong>Auto-Boost</strong>!
+          </div>
+
+          <div id="slipLegsList"></div>
+
+          <div id="slipStatusBanner" class="status-banner pass">
+            <span>✅ SPORTYBET 2.00+ GUARANTEED</span>
+            <span class="mono" id="slipTotalOddsBadge">2.10x</span>
+          </div>
+
+          <button class="btn btn-sporty" id="autoBoostBtn" style="width:100%;margin-bottom:10px;display:none;" onclick="autoBoostSlipTo2Odds()">
+            ⚡ Auto-Upgrade / Add Safe Leg to Hit 2.05+ Odds
+          </button>
+
+          <div class="slip-summary">
+            <div class="summary-row">
+              <span style="color:var(--text-secondary);">Global API Combined Odds:</span>
+              <span class="mono" id="slipGlobalOdds" style="color:var(--text-secondary);">0.00x</span>
+            </div>
+            <div class="summary-row">
+              <span style="font-weight:700;">SportyBet Calibrated Odds:</span>
+              <span class="mono" id="slipSportyOdds" style="font-size:18px;font-weight:800;color:#34d399;">0.00x</span>
+            </div>
+            <div class="summary-row">
+              <span style="color:var(--text-secondary);">Combined Win Probability:</span>
+              <span class="mono" id="slipWinProb" style="color:#6ee7b7;font-weight:700;">0.0%</span>
+            </div>
+
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle);">
+              <label class="field-label" style="margin-bottom:4px;">
+                <span>Your Daily Stake (₦)</span>
+                <span style="font-size:11px;color:var(--text-muted);">Flat Stake Discipline</span>
+              </label>
+              <input type="number" id="stakeInput" class="field-input" value="2000" min="100" step="500" oninput="updateSlipTotals()" />
+            </div>
+
+            <div class="summary-row" style="margin-top:10px;margin-bottom:2px;">
+              <span style="color:var(--text-secondary);">Expected SportyBet Payout:</span>
+              <span class="mono" id="slipPayout" style="font-weight:700;color:#fff;">₦0</span>
+            </div>
+            <div class="summary-row" style="margin-bottom:0;">
+              <span style="color:var(--alpha-green);font-weight:700;">Pure Daily Profit (+):</span>
+              <span class="mono" id="slipProfit" style="font-size:15px;font-weight:800;color:#34d399;">+₦0</span>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" onclick="copySlipToClipboard()">
+              📋 Copy Slip
+            </button>
+            <button class="btn btn-outline" onclick="clearSlip()">
+              🗑️ Clear
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-DAY 2.00 ODDS DISCIPLINE & PROFIT TRACKER -->
+      <div class="bankroll-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:14px;font-weight:800;">📈 7-Day 2.00-Odds Profit Ledger</div>
+          <button class="btn btn-sm btn-outline" onclick="resetLedger()">Reset Week</button>
+        </div>
+        <div style="font-size:11.5px;color:var(--text-secondary);margin-top:4px;">
+          Click any day below to toggle <strong>Won (2.05x)</strong> / <strong>Lost</strong>. Notice how even winning 5 out of 7 days makes strong weekly profit without Martingale!
+        </div>
+
+        <div class="day-pills" id="dayLedgerGrid"></div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:12px;font-size:12.5px;">
+          <div class="summary-row">
+            <span style="color:var(--text-secondary);">Weekly Record:</span>
+            <span class="mono" id="ledgerRecord" style="font-weight:700;">5W - 1L - 1P</span>
+          </div>
+          <div class="summary-row">
+            <span style="color:var(--text-secondary);">Total Staked (Flat):</span>
+            <span class="mono" id="ledgerStaked">₦12,000</span>
+          </div>
+          <div class="summary-row" style="margin-bottom:0;">
+            <span style="font-weight:700;">Net Weekly Profit:</span>
+            <span class="mono" id="ledgerNetProfit" style="font-size:16px;font-weight:800;color:#34d399;">+₦9,000</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toastMsg">Copied to clipboard!</div>
+
+  <script>
+    // STATE
+    let ALL_MATCHES = [];
+    let CURATED_TICKETS = [];
+    let CURRENT_SLIP = [];
+    let CURRENT_SPORT_MODE = 'hybrid';
+    let WEEK_LEDGER = JSON.parse(localStorage.getItem('jay_alpha_ledger') || '["won","won","lost","won","won","won","pending"]');
+
+    // INIT
+    window.addEventListener('DOMContentLoaded', async () => {
+      let savedOddsKey = localStorage.getItem('jay_alpha_odds_api_key') || '';
+      let savedSportingKey = localStorage.getItem('jay_alpha_sporting_key') || '';
+      let savedHaircut = localStorage.getItem('jay_alpha_haircut') || '0.025';
+      let savedMinTarget = localStorage.getItem('jay_alpha_min_target') || '2.06';
+
+      // Sync from Neon Serverless Postgres (/api/db) if connected on Vercel
+      try {
+        const dbResp = await fetch('/api/db');
+        if (dbResp.ok) {
+          const dbData = await dbResp.json();
+          if (dbData.neon_connected && dbData.settings) {
+            const s = dbData.settings;
+            if (s.the_odds_api_key) savedOddsKey = s.the_odds_api_key;
+            if (s.sporting_odds_api_key) savedSportingKey = s.sporting_odds_api_key;
+            if (s.sportybet_haircut) savedHaircut = String(parseFloat(s.sportybet_haircut));
+            if (s.min_target_odds) savedMinTarget = String(parseFloat(s.min_target_odds));
+            if (s.week_ledger_json) {
+              WEEK_LEDGER = JSON.parse(s.week_ledger_json);
+              localStorage.setItem('jay_alpha_ledger', s.week_ledger_json);
+            }
+          }
+        }
+      } catch (e) {}
+
+      document.getElementById('oddsApiKeyInput').value = savedOddsKey;
+      document.getElementById('sportingApiKeyInput').value = savedSportingKey;
+      document.getElementById('haircutSelect').value = savedHaircut;
+      document.getElementById('minTargetSelect').value = savedMinTarget;
+
+      renderLedger();
+      fetchLiveFeed();
+    });
+
+    async function syncToNeonDb() {
+      try {
+        await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            the_odds_api_key: localStorage.getItem('jay_alpha_odds_api_key') || '',
+            sporting_odds_api_key: localStorage.getItem('jay_alpha_sporting_key') || '',
+            sportybet_haircut: localStorage.getItem('jay_alpha_haircut') || '0.025',
+            min_target_odds: localStorage.getItem('jay_alpha_min_target') || '2.06',
+            week_ledger: WEEK_LEDGER
+          })
+        });
+      } catch (e) {}
+    }
+
+    function toggleApiDrawer() {
+      document.getElementById('apiDrawer').classList.toggle('open');
+    }
+
+    function setSportMode(mode, btnEl) {
+      CURRENT_SPORT_MODE = mode;
+      document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+      fetchLiveFeed();
+    }
+
+    function saveSettingsAndRefresh() {
+      const oddsKey = document.getElementById('oddsApiKeyInput').value.trim();
+      const sportingKey = document.getElementById('sportingApiKeyInput').value.trim();
+      const haircut = document.getElementById('haircutSelect').value;
+      const minTarget = document.getElementById('minTargetSelect').value;
+
+      localStorage.setItem('jay_alpha_odds_api_key', oddsKey);
+      localStorage.setItem('jay_alpha_sporting_key', sportingKey);
+      localStorage.setItem('jay_alpha_haircut', haircut);
+      localStorage.setItem('jay_alpha_min_target', minTarget);
+
+      document.getElementById('haircutValLabel').textContent = `-${(parseFloat(haircut)*100).toFixed(1)}% Buffer`;
+      syncToNeonDb();
+      fetchLiveFeed();
+    }
+
+    async function fetchLiveFeed() {
+      const oddsKey = localStorage.getItem('jay_alpha_odds_api_key') || '';
+      const haircut = localStorage.getItem('jay_alpha_haircut') || '0.025';
+      const minTarget = localStorage.getItem('jay_alpha_min_target') || '2.06';
+
+      document.getElementById('feedStatusText').textContent = 'Syncing Live Odds & xG...';
+
+      try {
+        const qs = new URLSearchParams({
+          odds_api_key: oddsKey,
+          sport_mode: CURRENT_SPORT_MODE,
+          haircut: haircut,
+          min_target: minTarget,
+          max_target: (parseFloat(minTarget) + 0.36).toFixed(2)
+        });
+        const resp = await fetch(`/api/feed?${qs.toString()}`);
+        const data = await resp.json();
+
+        if (data.ok) {
+          ALL_MATCHES = data.matches || [];
+          CURATED_TICKETS = data.tickets || [];
+
+          const fCount = ALL_MATCHES.filter(m => m.sport === 'football').length;
+          const tCount = ALL_MATCHES.filter(m => m.sport !== 'football').length;
+          document.getElementById('feedStatusText').textContent =
+            `Live Feed: ${fCount} Football + ${tCount} WTA/ATP Matches`;
+          document.getElementById('apiStatusBanner').textContent =
+            `SOURCE: ${data.api_status.provider} — ${data.api_status.custom_key_message}`;
+
+          populateLeagueDropdown();
+          renderCuratedTickets();
+          renderScannerTable();
+
+          if (CURRENT_SLIP.length === 0 && CURATED_TICKETS.length > 0) {
+            loadTicketIntoSlip(0, false);
+          }
+        }
+      } catch (err) {
+        document.getElementById('feedStatusText').textContent = 'Feed Error — Check Connection';
+      }
+    }
+
+    function formatKickoffWAT(isoStr) {
+      if (!isoStr) return 'Upcoming';
+      try {
+        const d = new Date(isoStr);
+        return d.toLocaleString('en-GB', {
+          timeZone: 'Africa/Lagos',
+          weekday: 'short',
+          day: '2-digit',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) + ' WAT';
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    function renderCuratedTickets() {
+      const container = document.getElementById('ticketsContainer');
+      if (!CURATED_TICKETS.length) {
+        container.innerHTML = `<div style="padding:24px;background:var(--bg-card);border-radius:12px;color:var(--text-secondary);">No qualifying matches found for this filter. Try switching Sport Mode to Hybrid Alpha.</div>`;
+        return;
+      }
+
+      const styleClasses = ['banker', 'hybrid', 'shield'];
+      container.innerHTML = CURATED_TICKETS.map((t, idx) => {
+        const cardClass = styleClasses[idx % styleClasses.length];
+        const legsHtml = t.legs.map(leg => `
+          <div class="leg-item">
+            <div class="leg-meta">
+              <span class="sport-tag ${leg.sport}">${leg.sport_label} • ${leg.league}</span>
+              <span>${formatKickoffWAT(leg.kickoff)}</span>
+            </div>
+            <div class="leg-teams">${leg.home_team} vs ${leg.away_team}</div>
+            <div class="leg-pick-row">
+              <span class="leg-pick-name">✔ ${leg.market_label}</span>
+              <span class="leg-pick-odds mono">${leg.sporty_odd.toFixed(2)} <span style="font-size:10.5px;color:var(--text-secondary);font-weight:500;">(API ${leg.global_odd.toFixed(2)})</span></span>
+            </div>
+            <div class="leg-rationale">
+              <strong>${leg.true_prob}% Model Conf:</strong> ${leg.rationale}
+            </div>
+          </div>
+        `).join('');
+
+        return `
+          <div class="ticket-card ${cardClass}">
+            <div>
+              <div class="ticket-top">
+                <div>
+                  <div class="ticket-name">${t.title}</div>
+                  <div class="ticket-sub">${t.subtitle}</div>
+                </div>
+                <div class="odds-badge-box">
+                  <div class="sporty-odds-big mono">${t.sportybet_total_odds.toFixed(2)}x</div>
+                  <div class="global-odds-small mono">Global API: ${t.global_api_total_odds.toFixed(2)}x</div>
+                </div>
+              </div>
+              ${legsHtml}
+            </div>
+
+            <div class="ticket-footer">
+              <div class="ticket-metrics">
+                <span>Hit Rate Est: <strong class="mono" style="color:#34d399;">${t.joint_win_probability}%</strong></span>
+                <span>SportyBet Cushion: <strong class="mono" style="color:#fbbf24;">-${t.sportybet_buffer_delta.toFixed(2)}x</strong></span>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn btn-primary btn-sm" onclick="loadTicketIntoSlip(${idx}, true)">
+                  ⚡ Load in Verifier Slip
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="copyTicketDirect(${idx})">
+                  📋 Copy Ticket Text
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function populateLeagueDropdown() {
+      const sel = document.getElementById('leagueFilter');
+      const currentVal = sel.value;
+      const leagues = Array.from(new Set(ALL_MATCHES.map(m => m.league)));
+      sel.innerHTML = `<option value="ALL">All Active Leagues & Tours (${ALL_MATCHES.length})</option>` +
+        leagues.map(l => `<option value="${l}">${l}</option>`).join('');
+      if (leagues.includes(currentVal)) sel.value = currentVal;
+    }
+
+    function renderScannerTable() {
+      const tbody = document.getElementById('scannerTableBody');
+      const lgFilter = document.getElementById('leagueFilter').value;
+      const catFilter = document.getElementById('categoryFilter').value;
+
+      let filtered = ALL_MATCHES.filter(m => {
+        if (CURRENT_SPORT_MODE === 'football' && m.sport !== 'football') return false;
+        if (CURRENT_SPORT_MODE === 'tennis' && m.sport === 'football') return false;
+        if (lgFilter !== 'ALL' && m.league !== lgFilter) return false;
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map((m, mIdx) => {
+        let mkts = m.markets;
+        if (catFilter !== 'ALL') {
+          mkts = mkts.filter(k => k.category === catFilter);
+        }
+        const topMkts = mkts.slice(0, 4);
+        if (topMkts.length === 0) return '';
+
+        const projHtml = m.sport === 'football'
+          ? `<div class="mono" style="font-size:12px;color:#34d399;font-weight:700;">Total xG: ${m.total_xg}</div>
+             <div style="font-size:11px;color:var(--text-secondary);">H: ${m.home_xg} | A: ${m.away_xg}</div>
+             <div style="font-size:10.5px;color:var(--text-muted);">Form: ${m.home_form} vs ${m.away_form}</div>`
+          : `<div class="mono" style="font-size:12px;color:#c084fc;font-weight:700;">No-Draw Court</div>
+             <div style="font-size:11px;color:var(--text-secondary);">P1: ${m.prob_1x2.home}% | P2: ${m.prob_1x2.away}%</div>
+             <div style="font-size:10.5px;color:var(--text-muted);">${m.home_form} vs ${m.away_form}</div>`;
+
+        const chipsHtml = topMkts.map(k => {
+          const payload = encodeURIComponent(JSON.stringify({
+            match_id: m.id,
+            sport: m.sport,
+            sport_label: m.sport_label,
+            league: m.league,
+            kickoff: m.kickoff,
+            home_team: m.home_team,
+            away_team: m.away_team,
+            market_code: k.code,
+            market_label: k.label,
+            true_prob: k.true_prob,
+            sporty_odd: k.sporty_odd,
+            global_odd: k.global_odd
+          }));
+          return `
+            <button class="mkt-chip" onclick="addLegFromChip('${payload}')" title="${k.rationale}">
+              <span>${k.label}</span>
+              <span class="odd-val">${k.sporty_odd.toFixed(2)}</span>
+              <span style="font-size:10px;color:var(--text-muted);">(${k.true_prob}%)</span>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <tr>
+            <td>
+              <span class="sport-tag ${m.sport}">${m.sport_label}</span>
+              <div style="font-size:11.5px;font-weight:600;margin-top:4px;">${m.league}</div>
+            </td>
+            <td>
+              <div style="font-weight:700;font-size:13.5px;">${m.home_team} vs ${m.away_team}</div>
+              <div style="font-size:11px;color:var(--text-secondary);">${formatKickoffWAT(m.kickoff)} • ${m.odds_source}</div>
+            </td>
+            <td>${projHtml}</td>
+            <td><div class="market-pills-wrap">${chipsHtml}</div></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function loadTicketIntoSlip(ticketIdx, showNotice) {
+      const t = CURATED_TICKETS[ticketIdx];
+      if (!t) return;
+      CURRENT_SLIP = t.legs.map(l => ({ ...l }));
+      renderSlip();
+      if (showNotice) showToast(`Loaded ${t.title} into SportyBet Verifier!`);
+    }
+
+    function addLegFromChip(encodedPayload) {
+      const leg = JSON.parse(decodeURIComponent(encodedPayload));
+      const existingIdx = CURRENT_SLIP.findIndex(x => x.match_id === leg.match_id);
+      if (existingIdx >= 0) {
+        CURRENT_SLIP[existingIdx] = leg;
+      } else {
+        if (CURRENT_SLIP.length >= 4) {
+          showToast('Max 4 legs recommended for 2.00+ discipline! Replacing oldest leg.');
+          CURRENT_SLIP.shift();
+        }
+        CURRENT_SLIP.push(leg);
+      }
+      renderSlip();
+      showToast(`Added ${leg.market_label} (${leg.sporty_odd.toFixed(2)})`);
+    }
+
+    function removeSlipLeg(idx) {
+      CURRENT_SLIP.splice(idx, 1);
+      renderSlip();
+    }
+
+    function clearSlip() {
+      CURRENT_SLIP = [];
+      renderSlip();
+    }
+
+    function onOverrideOddChange(idx, val) {
+      const num = parseFloat(val);
+      if (!isNaN(num) && num >= 1.01) {
+        CURRENT_SLIP[idx].sporty_odd = num;
+        updateSlipTotals();
+      }
+    }
+
+    function renderSlip() {
+      const listEl = document.getElementById('slipLegsList');
+      document.getElementById('slipLegCount').textContent = `${CURRENT_SLIP.length} Legs`;
+
+      if (CURRENT_SLIP.length === 0) {
+        listEl.innerHTML = `<div style="padding:18px;text-align:center;color:var(--text-muted);font-size:12.5px;border:1px dashed var(--border-subtle);border-radius:8px;margin-bottom:10px;">Your slip is empty. Click any Curated Ticket or Market Chip to load picks.</div>`;
+        updateSlipTotals();
+        return;
+      }
+
+      listEl.innerHTML = CURRENT_SLIP.map((leg, i) => `
+        <div class="slip-leg">
+          <div class="slip-leg-top">
+            <span>${leg.home_team} vs ${leg.away_team}</span>
+            <button class="remove-leg" onclick="removeSlipLeg(${i})" title="Remove leg">✕</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#34d399;font-weight:700;">
+            <span>✔ ${leg.market_label}</span>
+            <span style="font-size:11px;color:var(--text-secondary);">${leg.true_prob}% Conf</span>
+          </div>
+          <div class="slip-odd-edit-row">
+            <span>Exact Odd on Your SportyBet App:</span>
+            <input type="number" step="0.01" min="1.01" class="odd-override-input" value="${leg.sporty_odd.toFixed(2)}" oninput="onOverrideOddChange(${i}, this.value)" />
+          </div>
+        </div>
+      `).join('');
+
+      updateSlipTotals();
+    }
+
+    function updateSlipTotals() {
+      let sportyTotal = CURRENT_SLIP.length ? 1.0 : 0.0;
+      let globalTotal = CURRENT_SLIP.length ? 1.0 : 0.0;
+      let jointProb = CURRENT_SLIP.length ? 1.0 : 0.0;
+
+      CURRENT_SLIP.forEach(l => {
+        sportyTotal *= parseFloat(l.sporty_odd || 1.0);
+        globalTotal *= parseFloat(l.global_odd || l.sporty_odd || 1.0);
+        jointProb *= (parseFloat(l.true_prob || 65) / 100.0);
+      });
+
+      const stake = parseFloat(document.getElementById('stakeInput').value || 2000);
+      const payout = sportyTotal * stake;
+      const profit = Math.max(0, payout - stake);
+
+      document.getElementById('slipGlobalOdds').textContent = `${globalTotal.toFixed(2)}x`;
+      document.getElementById('slipSportyOdds').textContent = `${sportyTotal.toFixed(2)}x`;
+      document.getElementById('slipWinProb').textContent = `${(jointProb * 100).toFixed(1)}%`;
+      document.getElementById('slipPayout').textContent = `₦${Math.round(payout).toLocaleString()}`;
+      document.getElementById('slipProfit').textContent = `+₦${Math.round(profit).toLocaleString()}`;
+
+      const banner = document.getElementById('slipStatusBanner');
+      const boostBtn = document.getElementById('autoBoostBtn');
+      document.getElementById('slipTotalOddsBadge').textContent = `${sportyTotal.toFixed(2)}x`;
+
+      if (CURRENT_SLIP.length === 0) {
+        banner.className = 'status-banner warn';
+        banner.innerHTML = `<span>Select 2 Legs to Build 2.00+ Ticket</span><span class="mono">0.00x</span>`;
+        boostBtn.style.display = 'none';
+      } else if (sportyTotal < 2.00) {
+        banner.className = 'status-banner warn';
+        banner.innerHTML = `<span>⚠️ BELOW 2.00x ON SPORTYBET (${sportyTotal.toFixed(2)}x)</span><span class="mono">Needs +${(2.02 - sportyTotal).toFixed(2)}x</span>`;
+        boostBtn.style.display = 'inline-flex';
+      } else {
+        banner.className = 'status-banner pass';
+        banner.innerHTML = `<span>✅ SPORTYBET 2.00+ GUARANTEED</span><span class="mono">${sportyTotal.toFixed(2)}x</span>`;
+        boostBtn.style.display = 'none';
+      }
+    }
+
+    function autoBoostSlipTo2Odds() {
+      // Find the highest confidence safe leg not currently in slip to push total >= 2.04x
+      let currentTotal = CURRENT_SLIP.reduce((acc, l) => acc * l.sporty_odd, 1.0);
+      const usedIds = new Set(CURRENT_SLIP.map(l => l.match_id));
+
+      const availMatches = ALL_MATCHES.filter(m => !usedIds.has(m.id));
+      let bestCandidate = null;
+      let bestScore = -1;
+
+      for (const m of availMatches) {
+        for (const mkt of m.markets) {
+          const newTotal = currentTotal * mkt.sporty_odd;
+          if (newTotal >= 2.02 && newTotal <= 2.48 && mkt.true_prob >= 64) {
+            if (mkt.alpha_score > bestScore) {
+              bestScore = mkt.alpha_score;
+              bestCandidate = {
+                match_id: m.id,
+                sport: m.sport,
+                sport_label: m.sport_label,
+                league: m.league,
+                kickoff: m.kickoff,
+                home_team: m.home_team,
+                away_team: m.away_team,
+                market_code: mkt.code,
+                market_label: mkt.label,
+                true_prob: mkt.true_prob,
+                sporty_odd: mkt.sporty_odd,
+                global_odd: mkt.global_odd
+              };
+            }
+          }
+        }
+      }
+
+      if (bestCandidate && CURRENT_SLIP.length < 3) {
+        CURRENT_SLIP.push(bestCandidate);
+        renderSlip();
+        showToast(`Auto-Boosted! Added ${bestCandidate.market_label} (${bestCandidate.sporty_odd.toFixed(2)})`);
+      } else if (CURRENT_SLIP.length > 0) {
+        // Upgrade the lowest-odd leg to a slightly higher-odd safe leg
+        CURRENT_SLIP.sort((a, b) => a.sporty_odd - b.sporty_odd);
+        const removed = CURRENT_SLIP.shift();
+        const newCurrentTotal = CURRENT_SLIP.reduce((acc, l) => acc * l.sporty_odd, 1.0);
+        for (const m of availMatches) {
+          for (const mkt of m.markets) {
+            const newTotal = newCurrentTotal * mkt.sporty_odd;
+            if (newTotal >= 2.03 && newTotal <= 2.45 && mkt.true_prob >= 62) {
+              CURRENT_SLIP.push({
+                match_id: m.id,
+                sport: m.sport,
+                sport_label: m.sport_label,
+                league: m.league,
+                kickoff: m.kickoff,
+                home_team: m.home_team,
+                away_team: m.away_team,
+                market_code: mkt.code,
+                market_label: mkt.label,
+                true_prob: mkt.true_prob,
+                sporty_odd: mkt.sporty_odd,
+                global_odd: mkt.global_odd
+              });
+              renderSlip();
+              showToast(`Upgraded leg to ${mkt.label} (${mkt.sporty_odd.toFixed(2)}) -> 2.00+ Cleared!`);
+              return;
+            }
+          }
+        }
+        CURRENT_SLIP.unshift(removed);
+        renderSlip();
+      }
+    }
+
+    function copySlipToClipboard() {
+      if (!CURRENT_SLIP.length) return;
+      let total = CURRENT_SLIP.reduce((acc, l) => acc * l.sporty_odd, 1.0);
+      const lines = [
+        `⚡ JAY ALPHA SYSTEM — SPORTYBET 2.00+ SLIP (${total.toFixed(2)}x)`,
+        `--------------------------------------------`,
+        ...CURRENT_SLIP.map((l, i) => `${i+1}. [${l.league}] ${l.home_team} vs ${l.away_team}\n   Pick: ${l.market_label} @ ${l.sporty_odd.toFixed(2)} (${l.true_prob}% Conf)`),
+        `--------------------------------------------`,
+        `Total SportyBet Calibrated Odds: ${total.toFixed(2)}x`
+      ];
+      navigator.clipboard.writeText(lines.join('\n'));
+      showToast('Copied SportyBet 2.00+ Slip to Clipboard!');
+    }
+
+    function copyTicketDirect(idx) {
+      loadTicketIntoSlip(idx, false);
+      copySlipToClipboard();
+    }
+
+    // 7-DAY LEDGER FUNCTIONS
+    function renderLedger() {
+      const grid = document.getElementById('dayLedgerGrid');
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      let wins = 0, losses = 0, pending = 0;
+
+      grid.innerHTML = WEEK_LEDGER.map((status, idx) => {
+        if (status === 'won') wins++;
+        else if (status === 'lost') losses++;
+        else pending++;
+        const icon = status === 'won' ? '✅' : (status === 'lost' ? '❌' : '⏳');
+        return `
+          <div class="day-box ${status}" onclick="cycleLedgerDay(${idx})">
+            <div style="font-weight:700;">${days[idx]}</div>
+            <div style="font-size:14px;margin:3px 0;">${icon}</div>
+            <div class="mono" style="font-size:10px;text-transform:uppercase;">${status}</div>
+          </div>
+        `;
+      }).join('');
+
+      const stake = parseFloat(document.getElementById('stakeInput')?.value || 2000);
+      const played = wins + losses;
+      const totalStaked = played * stake;
+      const totalReturned = wins * (stake * 2.05);
+      const netProfit = totalReturned - totalStaked;
+
+      document.getElementById('ledgerRecord').textContent = `${wins}W - ${losses}L - ${pending}P`;
+      document.getElementById('ledgerStaked').textContent = `₦${Math.round(totalStaked).toLocaleString()}`;
+      const netEl = document.getElementById('ledgerNetProfit');
+      netEl.textContent = `${netProfit >= 0 ? '+' : ''}₦${Math.round(netProfit).toLocaleString()}`;
+      netEl.style.color = netProfit >= 0 ? '#34d399' : '#fb7185';
+    }
+
+    function cycleLedgerDay(idx) {
+      const order = ['won', 'lost', 'pending'];
+      const cur = WEEK_LEDGER[idx];
+      WEEK_LEDGER[idx] = order[(order.indexOf(cur) + 1) % order.length];
+      localStorage.setItem('jay_alpha_ledger', JSON.stringify(WEEK_LEDGER));
+      renderLedger();
+      syncToNeonDb();
+    }
+
+    function resetLedger() {
+      WEEK_LEDGER = ['won', 'won', 'lost', 'won', 'won', 'won', 'pending'];
+      localStorage.setItem('jay_alpha_ledger', JSON.stringify(WEEK_LEDGER));
+      renderLedger();
+      syncToNeonDb();
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toastMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 2800);
+    }
+  </script>
+</body>
+</html>

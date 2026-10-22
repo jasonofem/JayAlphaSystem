@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/feed", "destination": "/api/feed.js" },
+    { "source": "/api/db", "destination": "/api/db.js" },
+    { "source": "/(.*)", "destination": "/public/$1" }
+  ]
+}

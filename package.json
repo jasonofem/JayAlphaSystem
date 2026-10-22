@@ -1,0 +1,15 @@
+{
+  "name": "jay-alpha-system",
+  "version": "1.0.0",
+  "description": "JAY ALPHA SYSTEM — Quantitative 2.00+ Odds Engine (SportyBet Calibrated, Football + WTA/ATP Tennis, Neon Postgres)",
+  "private": true,
+  "scripts": {
+    "start": "python3 server.py"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
