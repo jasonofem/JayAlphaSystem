@@ -403,6 +403,7 @@ function buildTennisMarkets(p1Name, p2Name, p1Seed, p2Seed, tourName, tournament
 
 async function fetchEspnLiveMatches(haircut = 0.025, now = new Date()) {
   const matches = [];
+  const todayWat = getWatDateStr(now);
   const dateStrs = [0, 1, 2].map(d => {
     const dt = new Date(now.getTime() + d * 86400000);
     return getWatDateStr(dt).replace(/-/g, "");
@@ -424,6 +425,8 @@ async function fetchEspnLiveMatches(haircut = 0.025, now = new Date()) {
   );
 
   const seenIds = new Set();
+  // Keep scheduled, live, and completed fixtures. Daily rollover is controlled by
+  // the WAT ticket date, so finished matches remain available for tonight's ledger.
   for (const res of responses) {
     if (res.status !== "fulfilled" || !res.value || !res.value.data) continue;
     const { lg, data } = res.value;
@@ -432,7 +435,7 @@ async function fetchEspnLiveMatches(haircut = 0.025, now = new Date()) {
         if (seenIds.has(ev.id)) continue;
         const comp = (ev.competitions || [{}])[0];
         const state = ((comp.status || {}).type || {}).state || "pre";
-        if (state === "post") continue;
+        if (state === "post" && getWatDateStr(ev.date) !== todayWat) continue;
         seenIds.add(ev.id);
 
         const competitors = comp.competitors || [];
@@ -484,7 +487,7 @@ async function fetchEspnLiveMatches(haircut = 0.025, now = new Date()) {
           if (!gname.includes("Singles")) continue;
           for (const comp of (grp.competitions || [])) {
             const state = ((comp.status || {}).type || {}).state || "pre";
-            if (state === "post") continue;
+            if (state === "post" && getWatDateStr(comp.date) !== todayWat) continue;
             const competitors = comp.competitors || [];
             if (competitors.length < 2) continue;
             const p1 = ((competitors[0].athlete || {}).displayName) || "TBD";
@@ -818,4 +821,5 @@ module.exports = async function handler(req, res) {
 // Named properties keep the serverless handler as the default export while allowing
 // the date rule to be regression-tested without calling external feed providers.
 module.exports.getWatDateStr = getWatDateStr;
+module.exports.fetchEspnLiveMatches = fetchEspnLiveMatches;
 module.exports.generateCurated2OddsTickets = generateCurated2OddsTickets;

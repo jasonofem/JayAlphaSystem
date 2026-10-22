@@ -894,7 +894,7 @@
               <option value="2.15">2.15x Min (Extra Cushion)</option>
             </select>
           </div>
-          <button class="btn btn-primary" style="margin-top:18px;" onclick="fetchLiveFeed()">
+          <button class="btn btn-primary" style="margin-top:18px;" onclick="fetchLiveFeed(true)">
             🔄 Re-Analyze Live Slate
           </button>
         </div>
@@ -1068,7 +1068,92 @@
     let CURATED_TICKETS = [];
     let CURRENT_SLIP = [];
     let CURRENT_SPORT_MODE = 'hybrid';
+    let ACTIVE_FEED_DATE = '';
+    const DAILY_FEED_STORAGE_KEY = 'jay_alpha_daily_feed_v1';
+    const DAILY_SLIP_STORAGE_KEY = 'jay_alpha_daily_slip_v1';
     let WEEK_LEDGER = JSON.parse(localStorage.getItem('jay_alpha_ledger') || '["won","won","lost","won","won","won","pending"]');
+
+    function getWatDateStr(dateInput) {
+      const d = dateInput ? new Date(dateInput) : new Date();
+      return d.toLocaleDateString('en-CA', { timeZone: 'Africa/Lagos' });
+    }
+
+    function getDailyFeedConfigKey() {
+      const oddsKey = localStorage.getItem('jay_alpha_odds_api_key') || '';
+      const haircut = localStorage.getItem('jay_alpha_haircut') || '0.025';
+      const minTarget = localStorage.getItem('jay_alpha_min_target') || '2.06';
+      return JSON.stringify({
+        date: getWatDateStr(),
+        sportMode: CURRENT_SPORT_MODE,
+        haircut: String(parseFloat(haircut)),
+        minTarget: String(parseFloat(minTarget)),
+        feed: oddsKey ? 'custom-odds-api' : 'built-in'
+      });
+    }
+
+    function readDailyFeedSnapshot() {
+      try {
+        const raw = localStorage.getItem(DAILY_FEED_STORAGE_KEY);
+        if (!raw) return null;
+        const snapshot = JSON.parse(raw);
+        const isToday = snapshot.date === getWatDateStr();
+        const isCurrentConfig = snapshot.config === getDailyFeedConfigKey();
+        if (!isToday || !isCurrentConfig || !snapshot.data || snapshot.data.ok !== true) {
+          if (!isToday) localStorage.removeItem(DAILY_FEED_STORAGE_KEY);
+          return null;
+        }
+        return snapshot.data;
+      } catch (e) {
+        localStorage.removeItem(DAILY_FEED_STORAGE_KEY);
+        return null;
+      }
+    }
+
+    function saveDailyFeedSnapshot(data) {
+      const feedDate = data.ticket_date || getWatDateStr();
+      const hasTodayFixtures = (data.matches || []).some(m =>
+        m.kickoff && getWatDateStr(m.kickoff) === feedDate
+      );
+      if (feedDate !== getWatDateStr() || (!hasTodayFixtures && !(data.tickets || []).length)) return;
+
+      try {
+        localStorage.setItem(DAILY_FEED_STORAGE_KEY, JSON.stringify({
+          date: feedDate,
+          config: getDailyFeedConfigKey(),
+          savedAt: new Date().toISOString(),
+          data
+        }));
+      } catch (e) {
+        // The API still retains completed fixtures if browser storage is full/unavailable.
+      }
+    }
+
+    function readDailySlip() {
+      try {
+        const raw = localStorage.getItem(DAILY_SLIP_STORAGE_KEY);
+        if (!raw) return null;
+        const snapshot = JSON.parse(raw);
+        if (snapshot.date !== getWatDateStr() || snapshot.config !== getDailyFeedConfigKey() || !Array.isArray(snapshot.legs)) {
+          if (snapshot.date !== getWatDateStr()) localStorage.removeItem(DAILY_SLIP_STORAGE_KEY);
+          return null;
+        }
+        return snapshot.legs;
+      } catch (e) {
+        localStorage.removeItem(DAILY_SLIP_STORAGE_KEY);
+        return null;
+      }
+    }
+
+    function saveDailySlip() {
+      if (!ACTIVE_FEED_DATE) return;
+      try {
+        localStorage.setItem(DAILY_SLIP_STORAGE_KEY, JSON.stringify({
+          date: ACTIVE_FEED_DATE,
+          config: getDailyFeedConfigKey(),
+          legs: CURRENT_SLIP
+        }));
+      } catch (e) {}
+    }
 
     // INIT
     window.addEventListener('DOMContentLoaded', async () => {
@@ -1100,9 +1185,20 @@
       document.getElementById('sportingApiKeyInput').value = savedSportingKey;
       document.getElementById('haircutSelect').value = savedHaircut;
       document.getElementById('minTargetSelect').value = savedMinTarget;
+      localStorage.setItem('jay_alpha_odds_api_key', savedOddsKey);
+      localStorage.setItem('jay_alpha_sporting_key', savedSportingKey);
+      localStorage.setItem('jay_alpha_haircut', savedHaircut);
+      localStorage.setItem('jay_alpha_min_target', savedMinTarget);
 
       renderLedger();
-      fetchLiveFeed();
+      fetchLiveFeed(false);
+
+      // If the dashboard remains open across midnight, roll over to the new WAT day.
+      window.setInterval(() => {
+        if (ACTIVE_FEED_DATE && ACTIVE_FEED_DATE !== getWatDateStr()) {
+          fetchLiveFeed(true);
+        }
+      }, 60000);
     });
 
     async function syncToNeonDb() {
@@ -1129,7 +1225,7 @@
       CURRENT_SPORT_MODE = mode;
       document.querySelectorAll('.mode-tab').forEach(b => b.classList.remove('active'));
       if (btnEl) btnEl.classList.add('active');
-      fetchLiveFeed();
+      fetchLiveFeed(true);
     }
 
     function saveSettingsAndRefresh() {
@@ -1145,10 +1241,18 @@
 
       document.getElementById('haircutValLabel').textContent = `-${(parseFloat(haircut)*100).toFixed(1)}% Buffer`;
       syncToNeonDb();
-      fetchLiveFeed();
+      fetchLiveFeed(true);
     }
 
-    async function fetchLiveFeed() {
+    async function fetchLiveFeed(forceRefresh = false) {
+      if (!forceRefresh) {
+        const savedFeed = readDailyFeedSnapshot();
+        if (savedFeed) {
+          applyFeedData(savedFeed, true);
+          return;
+        }
+      }
+
       const oddsKey = localStorage.getItem('jay_alpha_odds_api_key') || '';
       const haircut = localStorage.getItem('jay_alpha_haircut') || '0.025';
       const minTarget = localStorage.getItem('jay_alpha_min_target') || '2.06';
@@ -1164,29 +1268,54 @@
           max_target: (parseFloat(minTarget) + 0.36).toFixed(2)
         });
         const resp = await fetch(`/api/feed?${qs.toString()}`);
+        if (!resp.ok) throw new Error(`Feed HTTP ${resp.status}`);
         const data = await resp.json();
+        if (!data.ok) throw new Error(data.error || 'Feed unavailable');
 
-        if (data.ok) {
-          ALL_MATCHES = data.matches || [];
-          CURATED_TICKETS = data.tickets || [];
-
-          const fCount = ALL_MATCHES.filter(m => m.sport === 'football').length;
-          const tCount = ALL_MATCHES.filter(m => m.sport !== 'football').length;
-          document.getElementById('feedStatusText').textContent =
-            `Live Feed: ${fCount} Football + ${tCount} WTA/ATP Matches`;
-          document.getElementById('apiStatusBanner').textContent =
-            `SOURCE: ${data.api_status.provider} — ${data.api_status.custom_key_message}`;
-
-          populateLeagueDropdown();
-          renderCuratedTickets();
-          renderScannerTable();
-
-          if (CURRENT_SLIP.length === 0 && CURATED_TICKETS.length > 0) {
-            loadTicketIntoSlip(0, false);
-          }
-        }
+        saveDailyFeedSnapshot(data);
+        applyFeedData(data, false);
       } catch (err) {
+        const savedFeed = readDailyFeedSnapshot();
+        if (savedFeed) {
+          applyFeedData(savedFeed, true);
+          return;
+        }
         document.getElementById('feedStatusText').textContent = 'Feed Error — Check Connection';
+      }
+    }
+
+    function applyFeedData(data, fromDailySnapshot = false) {
+      const feedDate = data.ticket_date || getWatDateStr();
+      const dayChanged = ACTIVE_FEED_DATE && ACTIVE_FEED_DATE !== feedDate;
+      if (dayChanged) CURRENT_SLIP = [];
+      ACTIVE_FEED_DATE = feedDate;
+
+      ALL_MATCHES = data.matches || [];
+      CURATED_TICKETS = data.tickets || [];
+
+      const fCount = ALL_MATCHES.filter(m => m.sport === 'football').length;
+      const tCount = ALL_MATCHES.filter(m => m.sport !== 'football').length;
+      document.getElementById('feedStatusText').textContent = fromDailySnapshot
+        ? `Saved Today (WAT): ${fCount} Football + ${tCount} WTA/ATP Matches`
+        : `Live Feed: ${fCount} Football + ${tCount} WTA/ATP Matches`;
+
+      const apiStatus = data.api_status || {};
+      document.getElementById('apiStatusBanner').textContent =
+        `SOURCE: ${apiStatus.provider || 'Jay Alpha Daily Feed'} — ${apiStatus.custom_key_message || ''}` +
+        (fromDailySnapshot ? ` • Fixtures saved for ${feedDate} (WAT)` : '');
+
+      populateLeagueDropdown();
+      renderCuratedTickets();
+      renderScannerTable();
+
+      const savedSlip = CURRENT_SLIP.length === 0 ? readDailySlip() : null;
+      if (savedSlip) {
+        CURRENT_SLIP = savedSlip;
+        renderSlip();
+      } else if (CURRENT_SLIP.length === 0 && CURATED_TICKETS.length > 0) {
+        loadTicketIntoSlip(0, false);
+      } else if (dayChanged) {
+        renderSlip();
       }
     }
 
@@ -1457,6 +1586,8 @@
         banner.innerHTML = `<span>✅ SPORTYBET 2.00+ GUARANTEED</span><span class="mono">${sportyTotal.toFixed(2)}x</span>`;
         boostBtn.style.display = 'none';
       }
+
+      saveDailySlip();
     }
 
     function autoBoostSlipTo2Odds() {
