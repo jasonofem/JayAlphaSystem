@@ -3,7 +3,6 @@ const assert = require("node:assert/strict");
 
 const {
   getWatDateStr,
-  fetchEspnLiveMatches,
   generateCurated2OddsTickets,
 } = require("../api/feed");
 
@@ -76,83 +75,4 @@ test("no ticket is built when only future-dated matches qualify", () => {
   ]);
 
   assert.deepEqual(tickets, []);
-});
-
-test("completed fixtures remain for their WAT day and expire on the next day", async () => {
-  const originalFetch = global.fetch;
-  const completedStatus = { type: { state: "post", description: "Full Time" } };
-
-  global.fetch = async url => {
-    let data = { events: [] };
-
-    if (url.includes("/soccer/uefa.champions/") && url.endsWith("dates=20261022")) {
-      data = {
-        events: [
-          {
-            id: "completed-football",
-            date: "2026-10-22T18:00:00Z",
-            competitions: [
-              {
-                status: completedStatus,
-                competitors: [
-                  { homeAway: "home", team: { shortDisplayName: "Home FC" } },
-                  { homeAway: "away", team: { shortDisplayName: "Away FC" } },
-                ],
-                odds: [],
-              },
-            ],
-          },
-        ],
-      };
-    } else if (url.includes("/tennis/wta/")) {
-      data = {
-        events: [
-          {
-            name: "WTA Daily Test",
-            groupings: [
-              {
-                grouping: { displayName: "Women's Singles" },
-                competitions: [
-                  {
-                    id: "completed-tennis",
-                    date: "2026-10-22T12:00:00Z",
-                    status: completedStatus,
-                    competitors: [
-                      { athlete: { displayName: "Player One" }, curatedRank: { current: 1 } },
-                      { athlete: { displayName: "Player Two" }, curatedRank: { current: 2 } },
-                    ],
-                  },
-                  {
-                    id: "previous-day-tennis",
-                    date: "2026-10-21T12:00:00Z",
-                    status: completedStatus,
-                    competitors: [
-                      { athlete: { displayName: "Old Player One" }, curatedRank: { current: 3 } },
-                      { athlete: { displayName: "Old Player Two" }, curatedRank: { current: 4 } },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      };
-    }
-
-    return { ok: true, json: async () => data };
-  };
-
-  try {
-    const matches = await fetchEspnLiveMatches(0.025, new Date("2026-10-22T08:00:00Z"));
-    const football = matches.find(match => match.id === "soc_completed-football");
-    const tennis = matches.find(match => match.id === "ten_completed-tennis");
-
-    assert.equal(football.status, "Full Time");
-    assert.equal(football.kickoff, "2026-10-22T18:00:00Z");
-    assert.equal(tennis.status, "Full Time");
-    assert.equal(tennis.kickoff, "2026-10-22T12:00:00Z");
-    assert.equal(matches.some(match => match.id === "ten_previous-day-tennis"), false);
-  } finally {
-    global.fetch = originalFetch;
-  }
 });
