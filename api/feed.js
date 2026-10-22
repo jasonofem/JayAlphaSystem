@@ -20,6 +20,11 @@ const LEAGUES_CONFIG = [
   { slug: "atp", name: "ATP Tour Singles", country: "ATP", avg_goals: 0, sport: "tennis" },
 ];
 
+function getWatDateStr(dateInput) {
+  const d = dateInput ? new Date(dateInput) : new Date();
+  return d.toLocaleDateString("en-CA", { timeZone: "Africa/Lagos" }); // YYYY-MM-DD in WAT
+}
+
 function factorial(n) {
   let r = 1;
   for (let i = 2; i <= n; i++) r *= i;
@@ -396,12 +401,11 @@ function buildTennisMarkets(p1Name, p2Name, p1Seed, p2Seed, tourName, tournament
   };
 }
 
-async function fetchEspnLiveMatches(haircut = 0.025) {
+async function fetchEspnLiveMatches(haircut = 0.025, now = new Date()) {
   const matches = [];
-  const now = new Date();
   const dateStrs = [0, 1, 2].map(d => {
     const dt = new Date(now.getTime() + d * 86400000);
-    return dt.toISOString().slice(0, 10).replace(/-/g, "");
+    return getWatDateStr(dt).replace(/-/g, "");
   });
 
   const tasks = [];
@@ -518,10 +522,12 @@ async function fetchEspnLiveMatches(haircut = 0.025) {
   return matches;
 }
 
-function generateCurated2OddsTickets(matches, sportMode = "hybrid", targetMinSporty = 2.04, targetMaxSporty = 2.42) {
-  let pool = matches;
-  if (sportMode === "football") pool = matches.filter(m => m.sport === "football");
-  else if (sportMode === "tennis") pool = matches.filter(m => m.sport === "wta" || m.sport === "atp");
+function generateCurated2OddsTickets(matches, sportMode = "hybrid", targetMinSporty = 2.04, targetMaxSporty = 2.42, ticketDate = getWatDateStr()) {
+  // Daily Ledger invariant: every curated leg must kick off on today's WAT calendar date.
+  // Filter here (not only in the handler) so every feed source and caller obeys the rule.
+  let pool = matches.filter(m => m.kickoff && getWatDateStr(m.kickoff) === ticketDate);
+  if (sportMode === "football") pool = pool.filter(m => m.sport === "football");
+  else if (sportMode === "tennis") pool = pool.filter(m => m.sport === "wta" || m.sport === "atp");
 
   const allowedCodes = new Set([
     "OVER_1_5", "OVER_2_5", "UNDER_3_5",
@@ -543,6 +549,7 @@ function generateCurated2OddsTickets(matches, sportMode = "hybrid", targetMinSpo
           sport_label: m.sport_label,
           league: m.league,
           kickoff: m.kickoff,
+          wat_date: ticketDate,
           home_team: m.home_team,
           away_team: m.away_team,
           odds_source: m.odds_source,
@@ -622,6 +629,7 @@ function generateCurated2OddsTickets(matches, sportMode = "hybrid", targetMinSpo
     }
     return {
       id, title, subtitle,
+      wat_date: ticketDate,
       legs_count: legs.length,
       sportybet_total_odds: Math.round(sportyTotal * 100) / 100,
       global_api_total_odds: Math.round(globalTotal * 100) / 100,
@@ -757,6 +765,8 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Content-Type", "application/json");
 
+  const requestNow = new Date();
+  const ticketDate = getWatDateStr(requestNow);
   const urlObj = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   const oddsApiKey = (urlObj.searchParams.get("odds_api_key") || process.env.THE_ODDS_API_KEY || "").trim();
   const sportMode = urlObj.searchParams.get("sport_mode") || "hybrid";
@@ -764,7 +774,7 @@ module.exports = async function handler(req, res) {
   const minTarget = Math.max(1.85, Math.min(2.35, parseFloat(urlObj.searchParams.get("min_target") || "2.04")));
   const maxTarget = Math.max(minTarget + 0.15, Math.min(2.85, parseFloat(urlObj.searchParams.get("max_target") || "2.42")));
 
-  const espnMatches = await fetchEspnLiveMatches(haircut);
+  const espnMatches = await fetchEspnLiveMatches(haircut, requestNow);
   let matches = espnMatches;
   let apiStatus = {
     provider: "Live ESPN + DraftKings Consensus + WTA/ATP Tour Feed (SportyBet Calibrated)",
@@ -786,11 +796,13 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  const tickets = generateCurated2OddsTickets(matches, sportMode, minTarget, maxTarget);
+  const tickets = generateCurated2OddsTickets(matches, sportMode, minTarget, maxTarget, ticketDate);
 
   res.status(200).json({
     ok: true,
     system: "JAY ALPHA SYSTEM — Quantitative 2.00+ Odds Engine",
+    ticket_date: ticketDate,
+    ticket_timezone: "Africa/Lagos",
     basketball_excluded: true,
     api_status: apiStatus,
     calibration: {
@@ -802,3 +814,8 @@ module.exports = async function handler(req, res) {
     matches,
   });
 };
+
+// Named properties keep the serverless handler as the default export while allowing
+// the date rule to be regression-tested without calling external feed providers.
+module.exports.getWatDateStr = getWatDateStr;
+module.exports.generateCurated2OddsTickets = generateCurated2OddsTickets;
